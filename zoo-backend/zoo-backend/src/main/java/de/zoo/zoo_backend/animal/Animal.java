@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import de.zoo.zoo_backend.enclosure.Enclosure;
 
 @Entity
 @Table(name = "animal")
@@ -30,6 +31,10 @@ public class Animal {
     @JoinColumn(name = "species_id", nullable = false)
     private Species species;
 
+    @ManyToOne
+    @JoinColumn(name = "enclosure_id")
+    private Enclosure enclosure;
+
     protected Animal() {
     }
 
@@ -43,4 +48,7 @@ public class Animal {
 
     public Species getSpecies() { return species; }
     public void setSpecies(Species species) { this.species = species; }
+
+    public Enclosure getEnclosure() { return enclosure; }
+    public void setEnclosure(Enclosure enclosure) { this.enclosure = enclosure; }
 }

@@ -1,0 +1,6 @@
+package de.zoo.zoo_backend.animal;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface AnimalRepository extends JpaRepository<Animal, Long> {
+}
