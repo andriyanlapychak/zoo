@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Animal } from './animal.model';
+import { Animal, AnimalRequest} from './animal.model';
 
 /**
  * Spricht mit der Tier-API des Backends.
@@ -24,4 +24,14 @@ export class AnimalService {
   getAll(): Observable<Animal[]> {
     return this.http.get<Animal[]>(this.baseUrl);
   }
+
+
+  /**
+   * Legt ein neues Tier an (POST /api/animals).
+   * Das Backend antwortet mit 201 und dem gespeicherten Tier inklusive vergebener ID.
+   */
+  create(request: AnimalRequest): Observable<Animal> {
+    return this.http.post<Animal>(this.baseUrl, request);
+  }
+
 }

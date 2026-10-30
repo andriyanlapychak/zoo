@@ -1,1 +1,3 @@
-<app-animal-list />
+<!-- Wenn das Formular "created" meldet, lädt die Liste (#list) sich neu -->
+<app-animal-form (created)="list.load()" />
+<app-animal-list #list />

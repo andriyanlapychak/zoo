@@ -10,3 +10,14 @@ export interface Animal {
   speciesName: string;
   enclosureName: string | null; // null = Tier ist keinem Gehege zugeordnet
 }
+
+/**
+ * Das, was Angular beim Anlegen oder Ändern an das Backend schickt
+ * (Gegenstück zu AnimalRequest in Java). Referenzen gehen als ID, nicht als Objekt.
+ */
+export interface AnimalRequest {
+  name: string;
+  dateOfBirth: string | null;  // Format "2020-05-01" oder null
+  speciesId: number;           // Pflicht: das Backend lehnt sonst mit 400 ab
+  enclosureId: number | null;  // optional: null = kein Gehege
+}

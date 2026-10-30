@@ -45,12 +45,16 @@ export class AnimalList implements OnInit {
   readonly animals = signal<Animal[]>([]);
   readonly error = signal<string | null>(null);
 
-  /** Wird von Angular einmal aufgerufen, sobald die Komponente erscheint. */
+    /** Wird von Angular einmal aufgerufen, sobald die Komponente erscheint. */
   ngOnInit(): void {
+    this.load();
+  }
+
+  /** Lädt die Tierliste neu. Wird auch nach dem Speichern eines Tiers aufgerufen. */
+  load(): void {
+    this.error.set(null);
     this.animalService.getAll().subscribe({
-      // Antwort ist da: Liste merken, Anzeige aktualisiert sich von selbst
       next: (list) => this.animals.set(list),
-      // Aufruf gescheitert: Meldung anzeigen statt stillschweigend nichts
       error: () => this.error.set('Tiere konnten nicht geladen werden.'),
     });
   }

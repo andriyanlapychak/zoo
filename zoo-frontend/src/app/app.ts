@@ -1,8 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { AnimalList } from './animal-list';
+import { AnimalForm } from './animal-form';
 
 @Component({
-  imports: [AnimalList],
+  imports: [AnimalList, AnimalForm],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',
