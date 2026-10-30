@@ -1,0 +1,144 @@
+# ============================================================
+# Testanfragen für die Zoo-App (Erweiterung "REST Client")
+# Über jedem Block erscheint "Send Request". Die Antwort öffnet sich rechts.
+# Tipp: IDs aus GET /api/species und GET /api/enclosures übernehmen.
+# ============================================================
+
+### 1. Alle Tiere lesen
+# Erwartung: 200 und eine JSON-Liste
+GET http://localhost:8080/api/animals
+
+### 2. Arten lesen (für die speciesId)
+GET http://localhost:8080/api/species
+
+### 3. Gehege lesen (für die enclosureId)
+GET http://localhost:8080/api/enclosures
+
+### 4. Tier anlegen, alles korrekt
+# Erwartung: 201 Created und das neue Tier mit ID
+# speciesId muss eine ID aus Block 2 sein, hier 1.
+POST http://localhost:8080/api/animals
+Content-Type: application/json
+
+{
+  "name": "Nala",
+  "dateOfBirth": "2021-03-01",
+  "speciesId": 1,
+  "enclosureId": null
+}
+
+### 5. NEGATIVTEST: Art existiert nicht
+# 999 gibt es in der Datenbank nicht. Absicht!
+# Erwartung: 400 und der Text "Art mit id 999 existiert nicht"
+POST http://localhost:8080/api/animals
+Content-Type: application/json
+
+{
+  "name": "Geist",
+  "dateOfBirth": "2021-03-01",
+  "speciesId": 999,
+  "enclosureId": null
+}
+
+### 6. NEGATIVTEST: Name fehlt
+# Die Zeile "name" ist absichtlich weggelassen (Pflichtfeld).
+# Aktuell: 500, denn die Datenbank lehnt ab (NOT NULL).
+# Ziel nach der Validierung: 400.
+POST http://localhost:8080/api/animals
+Content-Type: application/json
+
+{
+  "dateOfBirth": "2021-03-01",
+  "speciesId": 1,
+  "enclosureId": null
+}
+
+### 7. NEGATIVTEST: Name ist leerer Text
+# Anders als "fehlt" ist "" für die Datenbank gültig (nur null verletzt NOT NULL).
+# Erwartung: 400 mit "Name darf nicht leer sein"
+POST http://localhost:8080/api/animals
+Content-Type: application/json
+
+{
+  "name": "",
+  "dateOfBirth": "2021-03-01",
+  "speciesId": 1,
+  "enclosureId": null
+}
+
+### 8. NEGATIVTEST: Geburtsdatum in der Zukunft
+# Erwartung: 400 mit "Geburtsdatum darf nicht in der Zukunft liegen"
+POST http://localhost:8080/api/animals
+Content-Type: application/json
+
+{
+  "name": "Zukunft",
+  "dateOfBirth": "2099-01-01",
+  "speciesId": 1,
+  "enclosureId": null
+}
+
+### 9. Ein Tier nach ID lesen
+# Erwartung: 200 und genau dieses Tier (hier Leo mit id 1)
+GET http://localhost:8080/api/animals/1
+
+### 10. NEGATIVTEST: Tier-ID existiert nicht
+# Die ID steht in der Adresse, das Tier gibt es nicht.
+# Erwartung: 404 und der Text "Tier mit id 9999 existiert nicht"
+GET http://localhost:8080/api/animals/9999
+
+### 11. Tier löschen (ID von Nala einsetzen, nicht von Leo!)
+# Erwartung: 204 No Content, die Antwort hat keinen Body
+DELETE http://localhost:8080/api/animals/2
+
+### 12. Dasselbe Tier nochmal löschen
+# Das Tier ist jetzt weg. Erwartung: 404
+DELETE http://localhost:8080/api/animals/2
+
+### 13. Tier ändern (Leo kommt in die Savanne)
+# Erwartung: 200, "enclosureName" ist jetzt "Savanne"
+PUT http://localhost:8080/api/animals/1
+Content-Type: application/json
+
+{
+  "name": "Leo",
+  "dateOfBirth": "2019-05-01",
+  "speciesId": 1,
+  "enclosureId": 1
+}
+
+### 14. NEGATIVTEST: Tier-ID existiert nicht
+# Erwartung: 404
+PUT http://localhost:8080/api/animals/9999
+Content-Type: application/json
+
+{
+  "name": "Geist",
+  "dateOfBirth": "2019-05-01",
+  "speciesId": 1,
+  "enclosureId": null
+}
+
+### 15. NEGATIVTEST: Leerer Name beim Ändern
+# Dieselben Formregeln wie beim Anlegen. Erwartung: 400
+PUT http://localhost:8080/api/animals/1
+Content-Type: application/json
+
+{
+  "name": "",
+  "dateOfBirth": "2019-05-01",
+  "speciesId": 1,
+  "enclosureId": 1
+}
+
+### 16. Gehege entfernen (enclosureId weglassen)
+# PUT ersetzt vollständig: ohne Gehege ist Leo wieder ohne Gehege.
+# Erwartung: 200, "enclosureName" ist null
+PUT http://localhost:8080/api/animals/1
+Content-Type: application/json
+
+{
+  "name": "Leo",
+  "dateOfBirth": "2019-05-01",
+  "speciesId": 1
+}
