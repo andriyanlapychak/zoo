@@ -1,9 +1,10 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { AnimalService } from './animal.service';
 import { Animal } from './animal.model';
 
 /**
- * Zeigt die Tierliste als Tabelle an.
+ * Zeigt die Tierliste als Tabelle an und erlaubt das Löschen einzelner Tiere.
  * Sie fragt den AnimalService nach den Daten und kümmert sich nur um die Anzeige.
  */
 @Component({
@@ -18,7 +19,10 @@ import { Animal } from './animal.model';
 
     <table border="1" cellpadding="6">
       <thead>
-        <tr><th>ID</th><th>Name</th><th>Art</th><th>Geburtsdatum</th><th>Gehege</th></tr>
+        <tr>
+          <th>ID</th><th>Name</th><th>Art</th><th>Geburtsdatum</th><th>Gehege</th>
+          <th></th> <!-- NEU: Spalte für den Löschen-Button -->
+        </tr>
       </thead>
       <tbody>
         <!-- Eine Zeile pro Tier; track = woran Angular ein Tier wiedererkennt -->
@@ -30,6 +34,10 @@ import { Animal } from './animal.model';
             <!-- ?? '–' zeigt einen Strich, wenn der Wert fehlt (null) -->
             <td>{{ animal.dateOfBirth ?? '–' }}</td>
             <td>{{ animal.enclosureName ?? '–' }}</td>
+            <td>
+              <!-- NEU: (click) ruft remove() mit genau dem Tier dieser Zeile auf -->
+              <button type="button" (click)="remove(animal)">Löschen</button>
+            </td>
           </tr>
         }
       </tbody>
@@ -45,17 +53,36 @@ export class AnimalList implements OnInit {
   readonly animals = signal<Animal[]>([]);
   readonly error = signal<string | null>(null);
 
-    /** Wird von Angular einmal aufgerufen, sobald die Komponente erscheint. */
+  /** Wird von Angular einmal aufgerufen, sobald die Komponente erscheint. */
   ngOnInit(): void {
     this.load();
   }
 
-  /** Lädt die Tierliste neu. Wird auch nach dem Speichern eines Tiers aufgerufen. */
+  /** Lädt die Tierliste neu. Wird auch nach dem Speichern oder Löschen aufgerufen. */
   load(): void {
     this.error.set(null);
     this.animalService.getAll().subscribe({
       next: (list) => this.animals.set(list),
       error: () => this.error.set('Tiere konnten nicht geladen werden.'),
+    });
+  }
+
+  /**
+   * NEU: Löscht das Tier nach einer Rückfrage und lädt danach die Liste neu.
+   * Die Rückfrage verhindert, dass ein versehentlicher Klick Daten vernichtet.
+   */
+  remove(animal: Animal): void {
+    if (!window.confirm(`Tier "${animal.name}" wirklich löschen?`)) {
+      return; // Abbruch: nichts passiert
+    }
+    this.animalService.delete(animal.id).subscribe({
+      // Erfolg (204): aktuelle Liste vom Backend holen
+      next: () => this.load(),
+      // Fehler (z. B. 404, weil das Tier schon weg ist): Text des Backends anzeigen
+      error: (err: HttpErrorResponse) => {
+        const messages: string[] | undefined = err.error?.messages;
+        this.error.set(messages?.length ? messages.join(' | ') : 'Löschen fehlgeschlagen.');
+      },
     });
   }
 }

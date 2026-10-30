@@ -142,3 +142,6 @@ Content-Type: application/json
   "dateOfBirth": "2019-05-01",
   "speciesId": 1
 }
+
+### 17. Tier löschen 
+DELETE http://localhost:8080/api/animals/6

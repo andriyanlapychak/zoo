@@ -34,4 +34,14 @@ export class AnimalService {
     return this.http.post<Animal>(this.baseUrl, request);
   }
 
+    /**
+   * Löscht ein Tier (DELETE /api/animals/{id}).
+   * Das Backend antwortet bei Erfolg mit 204, also ohne Inhalt, daher Observable<void>.
+   * Gibt es das Tier nicht, antwortet es mit 404 und einem Fehlertext.
+   */
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  
 }
